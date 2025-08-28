@@ -471,13 +471,15 @@ class DocumentMerger:
             if file_path.endswith('.doc') and self.doc_converter.is_legacy_doc_file(file_path):
                 st.info(f"🔄 Conversion du fichier legacy: {os.path.basename(file_path)}")
                 
-                # Try to convert the legacy .doc file
+                # Use the same method as the preview feature (which works perfectly!)
                 converted_path = self.doc_converter.convert_doc_to_docx(file_path)
                 
                 if converted_path and os.path.exists(converted_path):
                     try:
+                        # Load the converted document - this now contains clean text
+                        converted_doc = Document(converted_path)
                         st.success(f"✅ Conversion réussie: {os.path.basename(file_path)}")
-                        return Document(converted_path)
+                        return converted_doc
                     except Exception as conv_error:
                         st.error(f"❌ Erreur après conversion: {str(conv_error)}")
                         raise ValueError(f"Impossible de lire le fichier converti: {str(conv_error)}")
