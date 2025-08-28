@@ -32,7 +32,17 @@ class DocConverter:
     
     def convert_doc_to_docx(self, doc_file_path: str) -> Optional[str]:
         """Convert legacy .doc file to .docx format using best available method"""
-        # Method 1: Try LibreOffice conversion (best quality)
+        # Method 1: Try mammoth (specialized for clean text extraction)
+        try:
+            result = self._convert_using_textract(doc_file_path)
+            if result:
+                st.success("🔄 Conversion réussie avec mammoth")
+                return result
+        except Exception as e:
+            st.warning(f"Mammoth failed: {str(e)}")
+            pass  # Continue to next method
+            
+        # Method 2: Try LibreOffice conversion (best quality)
         try:
             result = self._convert_using_libreoffice(doc_file_path)
             if result:
@@ -41,7 +51,7 @@ class DocConverter:
         except Exception as e:
             pass  # Continue to next method
             
-        # Method 2: Try antiword if available (Linux/Unix tool)
+        # Method 3: Try antiword if available (Linux/Unix tool)
         try:
             result = self._convert_using_antiword(doc_file_path)
             if result:
@@ -50,7 +60,7 @@ class DocConverter:
         except Exception as e:
             pass  # Continue to next method
             
-        # Method 3: Try python-docx2txt (may work for some .doc files)
+        # Method 4: Try python-docx2txt (may work for some .doc files)
         try:
             result = self._convert_using_docx2txt(doc_file_path)
             if result:
@@ -59,7 +69,7 @@ class DocConverter:
         except Exception as e:
             pass  # Continue to next method
             
-        # Method 4: Basic text extraction as last resort
+        # Method 5: Basic text extraction as last resort
         try:
             result = self._convert_using_basic_extraction(doc_file_path)
             if result:
@@ -71,15 +81,90 @@ class DocConverter:
         st.error("❌ Échec de toutes les méthodes de conversion")
         return None
     
+    def _convert_using_textract(self, doc_file_path: str) -> str:
+        """Convert using mammoth library for clean text extraction"""
+        try:
+            import mammoth
+        except ImportError:
+            raise ImportError("mammoth not available")
+        
+        try:
+            # Extract text using mammoth
+            with open(doc_file_path, "rb") as docx_file:
+                result = mammoth.extract_raw_text(docx_file)
+                text_content = result.value
+        except Exception as e:
+            # Fallback: try to convert .doc to .docx first
+            temp_docx = self._try_doc_to_docx_conversion(doc_file_path)
+            if temp_docx:
+                with open(temp_docx, "rb") as docx_file:
+                    result = mammoth.extract_raw_text(docx_file)
+                    text_content = result.value
+            else:
+                raise e
+        
+        if not text_content or not text_content.strip():
+            raise ValueError("Aucun texte extrait du fichier")
+        
+        # Clean the text - remove excessive whitespace and normalize
+        lines = []
+        for line in text_content.split('\n'):
+            cleaned_line = line.strip()
+            if cleaned_line:
+                lines.append(cleaned_line)
+        
+        # Join lines with proper spacing
+        clean_text = '\n\n'.join(lines)
+        
+        # Create a new .docx file with the clean extracted text
+        new_doc = Document()
+        
+        # Add each paragraph to the document
+        paragraphs = clean_text.split('\n\n')
+        for para_text in paragraphs:
+            if para_text.strip():
+                para = new_doc.add_paragraph(para_text.strip())
+                # Apply basic formatting
+                for run in para.runs:
+                    run.font.name = 'Calibri'
+                    run.font.size = Pt(11)
+        
+        # Save to temporary file
+        temp_docx_path = os.path.join(self.temp_dir, f"mammoth_converted_{os.path.basename(doc_file_path)}.docx")
+        new_doc.save(temp_docx_path)
+        
+        return temp_docx_path
+    
+    def _try_doc_to_docx_conversion(self, doc_file_path: str) -> Optional[str]:
+        """Try to convert .doc to .docx for mammoth processing"""
+        try:
+            return self._convert_using_libreoffice(doc_file_path)
+        except:
+            try:
+                return self._convert_using_antiword(doc_file_path)
+            except:
+                return None
+    
     def _convert_using_docx2txt(self, doc_file_path: str) -> str:
-        """Convert using python-docx2txt library"""
+        """Convert using python-docx2txt library - but only if it's really a .docx disguised as .doc"""
         try:
             import docx2txt
         except ImportError:
             raise ImportError("python-docx2txt not available")
         
-        # Extract text from .doc file
-        text_content = docx2txt.process(doc_file_path)
+        # Check if it's really a .docx file disguised as .doc
+        try:
+            # Try to read as zip (docx files are zip archives)
+            import zipfile
+            with zipfile.ZipFile(doc_file_path, 'r') as zip_ref:
+                if 'word/document.xml' in zip_ref.namelist():
+                    # It's actually a .docx file, so docx2txt will work
+                    text_content = docx2txt.process(doc_file_path)
+                else:
+                    raise ValueError("Not a .docx file in disguise")
+        except (zipfile.BadZipFile, ValueError):
+            # It's a real .doc file, docx2txt won't work
+            raise ValueError("Cannot process true .doc files with docx2txt")
         
         if not text_content or not text_content.strip():
             raise ValueError("Aucun texte extrait du fichier .doc")
