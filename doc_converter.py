@@ -31,8 +31,18 @@ class DocConverter:
             ])
     
     def convert_doc_to_docx(self, doc_file_path: str) -> Optional[str]:
-        """Convert legacy .doc file to .docx format using best available method"""
-        # Method 1: Try LibreOffice conversion (best quality)
+        """Convert legacy .doc file to .docx format using API text extraction"""
+        # Method 1: Try API-based text extraction (best quality)
+        try:
+            result = self._convert_using_api_extraction(doc_file_path)
+            if result:
+                st.success("🔄 Conversion réussie avec extraction API")
+                return result
+        except Exception as e:
+            st.warning(f"API extraction failed: {str(e)}")
+            pass  # Continue to fallback methods
+            
+        # Method 2: Try LibreOffice conversion (fallback)
         try:
             result = self._convert_using_libreoffice(doc_file_path)
             if result:
@@ -41,7 +51,7 @@ class DocConverter:
         except Exception as e:
             pass  # Continue to next method
             
-        # Method 2: Try antiword if available (Linux/Unix tool)
+        # Method 3: Try antiword if available (Linux/Unix tool)
         try:
             result = self._convert_using_antiword(doc_file_path)
             if result:
@@ -50,7 +60,7 @@ class DocConverter:
         except Exception as e:
             pass  # Continue to next method
             
-        # Method 3: Try python-docx2txt (may work for some .doc files)
+        # Method 4: Try python-docx2txt (may work for some .doc files)
         try:
             result = self._convert_using_docx2txt(doc_file_path)
             if result:
@@ -59,7 +69,7 @@ class DocConverter:
         except Exception as e:
             pass  # Continue to next method
             
-        # Method 4: Basic text extraction as last resort
+        # Method 5: Basic text extraction as last resort
         try:
             result = self._convert_using_basic_extraction(doc_file_path)
             if result:
@@ -67,9 +77,99 @@ class DocConverter:
                 return result
         except Exception as e:
             pass
+    
+    def _convert_using_api_extraction(self, doc_file_path: str) -> str:
+        """Convert .doc file using OpenAI API for clean text extraction"""
+        import requests
+        import base64
         
-        st.error("❌ Échec de toutes les méthodes de conversion")
-        return None
+        # Get API key
+        api_key = self._get_api_key()
+        if not api_key:
+            raise ValueError("Clé API OpenAI non trouvée")
+        
+        # Read and encode file
+        with open(doc_file_path, 'rb') as f:
+            file_content = f.read()
+        
+        # Use OpenAI API to extract text from the binary content
+        payload = {
+            "model": "gpt-4o",
+            "messages": [
+                {
+                    "role": "system", 
+                    "content": "Tu es un expert en extraction de texte de documents Word legacy. Extrais seulement le texte principal du document, en ignorant les numéros de page, en-têtes, pieds de page, et autres éléments de mise en forme. Conserve la structure des paragraphes et les sauts de ligne naturels. Réponds uniquement avec le texte extrait, sans commentaire."
+                },
+                {
+                    "role": "user", 
+                    "content": f"Voici le contenu binaire d'un fichier Word .doc legacy. Extrais le texte principal:\n\nContenu (premiers 8000 caractères): {str(file_content[:8000])}"
+                }
+            ],
+            "temperature": 0,
+            "max_tokens": 4000
+        }
+        
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            json=payload,
+            headers=headers,
+            timeout=60
+        )
+        
+        if response.status_code != 200:
+            raise ValueError(f"Erreur API: {response.status_code}")
+        
+        result = response.json()
+        extracted_text = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+        
+        if not extracted_text or len(extracted_text.strip()) < 10:
+            raise ValueError("Texte extrait insuffisant")
+        
+        # Create .docx with extracted text
+        return self._create_docx_from_text(extracted_text, doc_file_path)
+    
+    def _get_api_key(self) -> str:
+        """Get OpenAI API key from various sources"""
+        # Try Streamlit secrets first
+        try:
+            import streamlit as st
+            if hasattr(st, 'secrets') and 'OPENAI_API_KEY' in st.secrets:
+                key = st.secrets['OPENAI_API_KEY']
+                if key and key.strip():
+                    return key.strip()
+        except Exception:
+            pass
+        
+        # Try environment variable
+        try:
+            import os
+            key = os.getenv('OPENAI_API_KEY')
+            if key and key.strip():
+                return key.strip()
+        except Exception:
+            pass
+        
+        # Try local file
+        import os
+        candidates = [
+            os.path.join(os.getcwd(), 'cleAPI.txt'),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), 'cleAPI.txt')),
+        ]
+        for p in candidates:
+            try:
+                if os.path.exists(p):
+                    with open(p, 'r', encoding='utf-8') as f:
+                        key = f.read().strip()
+                        if key:
+                            return key
+            except Exception:
+                continue
+        return ""
     
     def _convert_using_docx2txt(self, doc_file_path: str) -> str:
         """Convert using python-docx2txt library"""
