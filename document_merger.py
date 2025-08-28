@@ -545,8 +545,27 @@ class DocumentMerger:
         return "\n".join(parts)[:max_chars]
 
     def _read_api_key(self) -> str:
-        """Read API key from cleAPI.txt in project root."""
-        # Try current working directory and project root
+        """Read API key from cleAPI.txt in project root or Streamlit secrets."""
+        # First try Streamlit secrets (works in cloud deployments)
+        try:
+            import streamlit as st
+            if hasattr(st, 'secrets') and 'OPENAI_API_KEY' in st.secrets:
+                key = st.secrets['OPENAI_API_KEY']
+                if key and key.strip():
+                    return key.strip()
+        except Exception:
+            pass
+        
+        # Then try environment variable
+        try:
+            import os
+            key = os.getenv('OPENAI_API_KEY')
+            if key and key.strip():
+                return key.strip()
+        except Exception:
+            pass
+        
+        # Finally try local file
         candidates = [
             os.path.join(os.getcwd(), 'cleAPI.txt'),
             os.path.abspath(os.path.join(os.path.dirname(__file__), 'cleAPI.txt')),

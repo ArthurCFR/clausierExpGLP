@@ -77,11 +77,14 @@ section.main > div {padding-top: 0 !important;}
   margin: 0 0 15px 0; 
 }
 
-/* Center the Streamlit button */
-div.stButton { 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
+/* Center the Streamlit button - with more specificity for online deployment */
+div.stButton, 
+.stApp div.stButton,
+section.main div.stButton { 
+  display: flex !important; 
+  align-items: center !important; 
+  justify-content: center !important; 
+  width: 100% !important;
   animation: blurIn 1s ease-out both;
 }
 div.stButton > button { 
