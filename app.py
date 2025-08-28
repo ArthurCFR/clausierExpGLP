@@ -383,7 +383,7 @@ div.stButton > button:active {
                         clause_mapping = {}
                         for clause in section_clauses:
                             if clause['file_name'].endswith('.doc'):
-                                legacy_indicator = " 📄" if clause.get('is_legacy_doc', False) else ""
+                                legacy_indicator = " ⚠️"
                                 option_label = f"{clause['name']}{legacy_indicator}"
                             else:
                                 option_label = clause['name']
@@ -393,12 +393,12 @@ div.stButton > button:active {
                             f"Clauses pour: {section['name']}",
                             options=clause_options,
                             key=f"section_{section['key']}",
-                            help=f"Sélectionnez les clauses pour la section '{section['name']}'. 📄 = fichier legacy (.doc)"
+                            help=f"Sélectionnez les clauses pour la section '{section['name']}'. ⚠️ = fichier .doc non supporté"
                         )
                         
                         # Add selected clauses to the main list
                         for label in selected_for_section:
-                            base_name = label.replace(' 📄', '')
+                            base_name = label.replace(' ⚠️', '')
                             clause_obj = next((c for c in section_clauses if c['name'] == base_name), None)
                             if clause_obj:
                                 selected_clauses_all.append(clause_obj)
@@ -419,7 +419,7 @@ div.stButton > button:active {
                     uncategorized_mapping = {}
                     for clause in uncategorized_clauses:
                         if clause['file_name'].endswith('.doc'):
-                            legacy_indicator = " 📄" if clause.get('is_legacy_doc', False) else ""
+                            legacy_indicator = " ⚠️"
                             option_label = f"{clause['name']}{legacy_indicator}"
                         else:
                             option_label = clause['name']
@@ -430,12 +430,12 @@ div.stButton > button:active {
                         "Clauses non catégorisées:",
                         options=uncategorized_options,
                         key="section_uncategorized",
-                        help="Clauses qui n'ont pas pu être automatiquement assignées à une section. 📄 = fichier legacy (.doc)"
+                        help="Clauses qui n'ont pas pu être automatiquement assignées à une section. ⚠️ = fichier .doc non supporté"
                     )
                     
                     # Add selected uncategorized clauses to the main list
                     for label in selected_uncategorized:
-                        base_name = label.replace(' 📄', '')
+                        base_name = label.replace(' ⚠️', '')
                         clause_obj = next((c for c in uncategorized_clauses if c['name'] == base_name), None)
                         if clause_obj:
                             selected_clauses_all.append(clause_obj)

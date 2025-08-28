@@ -469,23 +469,19 @@ class DocumentMerger:
         except Exception as e:
             # Check if it's a legacy .doc file that needs conversion
             if file_path.endswith('.doc') and self.doc_converter.is_legacy_doc_file(file_path):
-                st.info(f"🔄 Conversion du fichier legacy: {os.path.basename(file_path)}")
-                
-                # Use the same method as the preview feature (which works perfectly!)
+                # Generate placeholder for unsupported .doc files
                 converted_path = self.doc_converter.convert_doc_to_docx(file_path)
                 
                 if converted_path and os.path.exists(converted_path):
                     try:
-                        # Load the converted document - this now contains clean text
+                        # Load the converted document - this now contains a placeholder
                         converted_doc = Document(converted_path)
-                        st.success(f"✅ Conversion réussie: {os.path.basename(file_path)}")
                         return converted_doc
                     except Exception as conv_error:
-                        st.error(f"❌ Erreur après conversion: {str(conv_error)}")
-                        raise ValueError(f"Impossible de lire le fichier converti: {str(conv_error)}")
+                        st.error(f"❌ Erreur lors du traitement: {str(conv_error)}")
+                        raise ValueError(f"Impossible de traiter le fichier: {str(conv_error)}")
                 else:
-                    st.error(f"❌ Échec de la conversion de {os.path.basename(file_path)}")
-                    raise ValueError(f"Conversion du fichier legacy échouée: {os.path.basename(file_path)}")
+                    raise ValueError(f"Impossible de traiter le fichier: {os.path.basename(file_path)}")
             
             # If it's not a legacy .doc file or conversion failed, provide helpful error message
             import mimetypes
