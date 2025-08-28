@@ -4,7 +4,7 @@ import os
 import tempfile
 from typing import Optional, Tuple
 from docx import Document
-from docx.shared import Pt
+from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import streamlit as st
 
@@ -31,55 +31,52 @@ class DocConverter:
             ])
     
     def convert_doc_to_docx(self, doc_file_path: str) -> Optional[str]:
-        """Convert legacy .doc file to .docx format using best available method"""
-        # Method 1: Try mammoth (specialized for clean text extraction)
-        try:
-            result = self._convert_using_textract(doc_file_path)
-            if result:
-                st.success("🔄 Conversion réussie avec mammoth")
-                return result
-        except Exception as e:
-            st.warning(f"Mammoth failed: {str(e)}")
-            pass  # Continue to next method
-            
-        # Method 2: Try LibreOffice conversion (best quality)
-        try:
-            result = self._convert_using_libreoffice(doc_file_path)
-            if result:
-                st.success("🔄 Conversion réussie avec LibreOffice")
-                return result
-        except Exception as e:
-            pass  # Continue to next method
-            
-        # Method 3: Try antiword if available (Linux/Unix tool)
-        try:
-            result = self._convert_using_antiword(doc_file_path)
-            if result:
-                st.success("🔄 Conversion réussie avec antiword")
-                return result
-        except Exception as e:
-            pass  # Continue to next method
-            
-        # Method 4: Try python-docx2txt (may work for some .doc files)
-        try:
-            result = self._convert_using_docx2txt(doc_file_path)
-            if result:
-                st.info("🔄 Conversion basique réussie (qualité limitée)")
-                return result
-        except Exception as e:
-            pass  # Continue to next method
-            
-        # Method 5: Basic text extraction as last resort
-        try:
-            result = self._convert_using_basic_extraction(doc_file_path)
-            if result:
-                st.warning("⚠️ Conversion basique - formatage minimal préservé")
-                return result
-        except Exception as e:
-            pass
+        """Convert legacy .doc file to .docx format - for now, create a placeholder"""
         
-        st.error("❌ Échec de toutes les méthodes de conversion")
-        return None
+        # For problematic .doc files, create a clear placeholder document
+        st.error(f"⚠️ Fichier .doc non supporté: {os.path.basename(doc_file_path)}")
+        st.info("💡 Solution: Convertir manuellement ce fichier .doc en .docx avec Microsoft Word ou LibreOffice")
+        
+        # Create a placeholder document explaining the issue
+        new_doc = Document()
+        
+        # Add a clear message explaining the situation
+        title_para = new_doc.add_paragraph()
+        title_run = title_para.add_run("⚠️ FICHIER NON CONVERTI")
+        title_run.font.bold = True
+        title_run.font.size = Pt(14)
+        title_run.font.color.rgb = RGBColor(0xFF, 0x00, 0x00)  # Red color
+        
+        new_doc.add_paragraph("")  # Empty line
+        
+        info_para = new_doc.add_paragraph()
+        info_run = info_para.add_run(f"Le fichier '{os.path.basename(doc_file_path)}' est au format .doc legacy et n'a pas pu être converti automatiquement.")
+        info_run.font.size = Pt(11)
+        
+        new_doc.add_paragraph("")  # Empty line
+        
+        solution_para = new_doc.add_paragraph()
+        solution_run = solution_para.add_run("Solution recommandée :")
+        solution_run.font.bold = True
+        solution_run.font.size = Pt(11)
+        
+        steps = [
+            "1. Ouvrir le fichier .doc avec Microsoft Word ou LibreOffice",
+            "2. Faire 'Enregistrer sous' et choisir le format .docx",
+            "3. Remplacer le fichier .doc par le nouveau .docx dans le dossier des clauses",
+            "4. Recharger l'application"
+        ]
+        
+        for step in steps:
+            step_para = new_doc.add_paragraph()
+            step_run = step_para.add_run(step)
+            step_run.font.size = Pt(10)
+        
+        # Save placeholder document
+        temp_docx_path = os.path.join(self.temp_dir, f"placeholder_{os.path.basename(doc_file_path)}.docx")
+        new_doc.save(temp_docx_path)
+        
+        return temp_docx_path
     
     def _convert_using_textract(self, doc_file_path: str) -> str:
         """Convert using mammoth library for clean text extraction"""
