@@ -74,7 +74,7 @@ section.main > div {padding-top: 0 !important;}
 .hero h3 { 
   font-size: 1.2rem; 
   font-style: italic; 
-  color: #003DA5; 
+  color: #262730; 
   margin: 0 0 15px 0; 
 }
 
@@ -113,6 +113,7 @@ div.stButton > button:active {
 
 .logo-container img {
   max-width: 200px;
+  margin-bottom: 20px;
   height: auto;
 }
 
