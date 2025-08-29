@@ -66,9 +66,9 @@ section.main > div {padding-top: 0 !important;}
   font-size: 2.5rem; 
   line-height: 1.05; 
   margin: 0 0 10px 0; 
-  color: #003DA5; 
-  font-weight: 800; 
-  font-family: 'Montserrat ExtraBold', Montserrat, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: #262730; 
+  font-weight: 600; 
+  font-family: "Source Sans Pro", sans-serif;
 }
 
 .hero h3 { 
@@ -84,17 +84,22 @@ div.stButton > button {
   padding: 0.8rem 1.6rem; 
   font-size: 1.1rem; 
   border-radius: 8px; 
-  background: #003DA5; 
+  background: #28a745; 
   color: #fff; 
   border: none; 
   width: 100%;
   animation: blurIn 1s ease-out both;
 }
 
-div.stButton > button:hover,
+div.stButton > button:hover {
+  background: #218838 !important;
+  color: #fff !important;
+  border: none !important;
+}
+
 div.stButton > button:focus,
 div.stButton > button:active {
-  background: #003DA5 !important;
+  background: #1e7e34 !important;
   color: #fff !important;
   border: none !important;
 }
@@ -115,7 +120,7 @@ div.stButton > button:active {
 
 <div class="hero-wrap">
   <div class="hero">
-    <h1>AGRÉGATEUR DE CLAUSES</h1>
+    <h1>🎆 Agrégateur de clauses</h1>
     <h3><em>Expérimentations IA de la Direction Juridique du groupe La Poste</em></h3>
   </div>
 </div>
@@ -137,7 +142,7 @@ div.stButton > button:active {
         # Use Streamlit columns with better proportions for true centering
         col1, col2, col3 = st.columns([2, 1, 2])
         with col2:
-            if st.button("Commencer un contrat", key="start_contract", use_container_width=True):
+            if st.button("🧩 Commencer un contrat", key="start_contract", use_container_width=True):
                 st.session_state.show_intro = False
                 st.rerun()
         return
@@ -766,22 +771,35 @@ def _generate_contract_preview(selected_clauses: list) -> str:
                 contract_parts.append("="*50 + "\n")
             else:
                 contract_parts.append(f"\n**--- {section['order']}. {section['name']} ---** : aucune clause sélectionnée\n")
-                
-                # Check if next section has content
+        
+        # Now add separators after empty sections that are followed by sections with content
+        # We need to do this in a second pass to avoid separator duplication
+        final_parts = []
+        for i, part in enumerate(contract_parts):
+            final_parts.append(part)
+            
+            # Check if this is an empty section line
+            if " : aucune clause sélectionnée" in part:
+                # Find the next section in the remaining contract_parts
                 next_section_has_content = False
-                for j in range(i + 1, len(sections)):
-                    next_section_key = sections[j]['key']
-                    if next_section_key in clauses_by_section:
-                        next_section_has_content = True
+                for j in range(i + 1, len(contract_parts)):
+                    next_part = contract_parts[j]
+                    # If we find another section header
+                    if next_part.startswith("\n**---") and "---**" in next_part:
+                        # Check if it's NOT an empty section
+                        if " : aucune clause sélectionnée" not in next_part:
+                            next_section_has_content = True
                         break
                 
-                # Also check if uncategorized section exists (only if no more sections with content)
+                # Also check uncategorized section if no more regular sections with content
                 if not next_section_has_content and 'uncategorized' in clauses_by_section:
                     next_section_has_content = True
                 
-                # Add separator only if next section has content
+                # Add separator if next section has content
                 if next_section_has_content:
-                    contract_parts.append("="*50 + "\n")
+                    final_parts.append("="*50 + "\n")
+        
+        contract_parts = final_parts
         
         # Add uncategorized clauses at the end
         if 'uncategorized' in clauses_by_section:
