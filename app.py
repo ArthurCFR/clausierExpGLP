@@ -748,8 +748,9 @@ def _generate_contract_preview(selected_clauses: list) -> str:
         # Process sections in order
         for i, section in enumerate(sections):
             section_key = section['key']
+            section_has_clauses = section_key in clauses_by_section
             
-            if section_key in clauses_by_section:
+            if section_has_clauses:
                 contract_parts.append(f"\n**--- {section['order']}. {section['name']} ---**\n")
                 
                 for clause in clauses_by_section[section_key]:
@@ -761,12 +762,12 @@ def _generate_contract_preview(selected_clauses: list) -> str:
                         contract_parts.append("(Contenu non disponible)")
                     contract_parts.append("\n")
                 
-                # Add separator after non-empty section
+                # Always add separator after section with clauses
                 contract_parts.append("="*50 + "\n")
             else:
                 contract_parts.append(f"\n**--- {section['order']}. {section['name']} ---** : aucune clause sélectionnée\n")
                 
-                # Add separator after empty section if next section has content
+                # Check if next section has content
                 next_section_has_content = False
                 for j in range(i + 1, len(sections)):
                     next_section_key = sections[j]['key']
@@ -774,10 +775,11 @@ def _generate_contract_preview(selected_clauses: list) -> str:
                         next_section_has_content = True
                         break
                 
-                # Also check if uncategorized section exists
+                # Also check if uncategorized section exists (only if no more sections with content)
                 if not next_section_has_content and 'uncategorized' in clauses_by_section:
                     next_section_has_content = True
                 
+                # Add separator only if next section has content
                 if next_section_has_content:
                     contract_parts.append("="*50 + "\n")
         
