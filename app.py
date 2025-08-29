@@ -141,7 +141,7 @@ div.stButton > button:active {
         )
         
         # Use Streamlit columns with better proportions for true centering
-        col1, col2, col3 = st.columns([2, 1, 2])
+        col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
             if st.button("🧩 Commencer un contrat", key="start_contract", use_container_width=True):
                 st.session_state.show_intro = False
