@@ -77,18 +77,7 @@ section.main > div {padding-top: 0 !important;}
   margin: 0 0 15px 0; 
 }
 
-/* Center the Streamlit button - with maximum specificity for online deployment */
-div.stButton, 
-.stApp div.stButton,
-section.main div.stButton,
-.stApp > div > div > div > div > div.stButton,
-[data-testid="stAppViewContainer"] div.stButton { 
-  display: flex !important; 
-  align-items: center !important; 
-  justify-content: center !important; 
-  width: 100% !important;
-  animation: blurIn 1s ease-out both;
-}
+/* Style the start contract button */
 div.stButton > button { 
   margin: 0; 
   padding: 0.8rem 1.6rem; 
@@ -97,6 +86,8 @@ div.stButton > button {
   background: #003DA5; 
   color: #fff; 
   border: none; 
+  width: 100%;
+  animation: blurIn 1s ease-out both;
 }
 
 div.stButton > button:hover,
@@ -119,19 +110,6 @@ div.stButton > button:active {
   height: auto;
 }
 
-/* Additional button centering container for cloud deployment */
-.button-center-container {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  width: 100% !important;
-  margin: 20px 0 !important;
-}
-
-.button-center-container div.stButton {
-  width: auto !important;
-  margin: 0 !important;
-}
 </style>
 
 <div class="hero-wrap">
@@ -155,12 +133,12 @@ div.stButton > button:active {
             unsafe_allow_html=True
         )
         
-        # Add explicit centering container for the button
-        st.markdown('<div class="button-center-container">', unsafe_allow_html=True)
-        if st.button("Commencer un contrat", key="start_contract"):
-            st.session_state.show_intro = False
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+        # Use Streamlit columns for button centering
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
+            if st.button("Commencer un contrat", key="start_contract"):
+                st.session_state.show_intro = False
+                st.rerun()
         return
 
     st.title("🎆 Agrégateur de clauses")
@@ -557,11 +535,11 @@ div.stButton > button:active {
                                 sections_order
                             )
                             
-                            # Generate filename
+                            # Generate filename - simple format with custom name + date
                             if custom_filename:
-                                filename = f"{custom_filename}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
+                                filename = f"{custom_filename}_{datetime.now().strftime('%Y%m%d')}.docx"
                             else:
-                                filename = f"clauses_assemblees_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
+                                filename = f"document_{datetime.now().strftime('%Y%m%d')}.docx"
                             
                             # Offer download
                             with open(merged_doc_path, 'rb') as f:
