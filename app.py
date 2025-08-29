@@ -163,7 +163,12 @@ div.stButton > button:active {
         st.session_state.preview_converter = DocConverter()
     
     # Inline preview panel (scrollable, non-disabled)
-    if st.session_state.get('preview_content') and not st.session_state.get('hide_preview', False):
+    show_preview = (
+        st.session_state.get('preview_content') and 
+        not st.session_state.get('hide_preview', False)
+    )
+    
+    if show_preview:
         st.markdown("### Aperçu de la clause")
         st.markdown(f"**{st.session_state.get('preview_title', 'Clause')}**")
         safe_html = html.escape(st.session_state['preview_content'])
@@ -176,7 +181,10 @@ div.stButton > button:active {
             unsafe_allow_html=True,
         )
         if st.button("Fermer l'aperçu", key="close_preview_panel"):
-            st.session_state.hide_preview = True
+            # Clean up preview state without rerun
+            for key in ['preview_content', 'preview_title', 'hide_preview']:
+                if key in st.session_state:
+                    del st.session_state[key]
             st.rerun()
     
     # Sidebar for configuration
@@ -443,6 +451,15 @@ div.stButton > button:active {
                 # Summary sidebar
                 st.markdown("### 📊 Résumé de sélection")
                 
+                # Contract preview button
+                if selected_clauses_all:
+                    if st.button("📋 Aperçu du contrat", key="contract_preview_btn", use_container_width=True):
+                        contract_preview = _generate_contract_preview(selected_clauses_all)
+                        st.session_state['preview_title'] = "Aperçu du contrat complet"
+                        st.session_state['preview_content'] = contract_preview
+                        st.session_state.hide_preview = False
+                        st.rerun()
+                
                 if selected_clauses_all:
                     st.success(f"**{len(selected_clauses_all)} clause(s) sélectionnée(s)**")
                     
@@ -607,6 +624,55 @@ def _get_clause_preview(clause: dict) -> str:
             return _extract_docx_text(path)
     except Exception as e:
         return f"Erreur d'aperçu: {str(e)}"
+
+
+def _generate_contract_preview(selected_clauses: list) -> str:
+    """Generate a complete contract preview by concatenating all selected clauses."""
+    try:
+        sections = st.session_state.parties_parser.get_sections()
+        
+        # Organize clauses by section
+        clauses_by_section = {}
+        for clause in selected_clauses:
+            section_key = clause.get('section_tag', 'uncategorized')
+            if section_key not in clauses_by_section:
+                clauses_by_section[section_key] = []
+            clauses_by_section[section_key].append(clause)
+        
+        contract_parts = []
+        contract_parts.append("=== APERÇU DU CONTRAT COMPLET ===\n")
+        
+        # Process sections in order
+        for section in sections:
+            section_key = section['key']
+            if section_key in clauses_by_section:
+                contract_parts.append(f"\n--- {section['order']}. {section['name']} ---\n")
+                
+                for clause in clauses_by_section[section_key]:
+                    contract_parts.append(f"\n[{clause['name']}]\n")
+                    clause_content = _get_clause_preview(clause)
+                    if clause_content:
+                        contract_parts.append(clause_content)
+                    else:
+                        contract_parts.append("(Contenu non disponible)")
+                    contract_parts.append("\n" + "="*50 + "\n")
+        
+        # Add uncategorized clauses at the end
+        if 'uncategorized' in clauses_by_section:
+            contract_parts.append("\n--- Clauses non catégorisées ---\n")
+            for clause in clauses_by_section['uncategorized']:
+                contract_parts.append(f"\n[{clause['name']}]\n")
+                clause_content = _get_clause_preview(clause)
+                if clause_content:
+                    contract_parts.append(clause_content)
+                else:
+                    contract_parts.append("(Contenu non disponible)")
+                contract_parts.append("\n" + "="*50 + "\n")
+        
+        return "\n".join(contract_parts)
+        
+    except Exception as e:
+        return f"Erreur lors de la génération de l'aperçu du contrat: {str(e)}"
 
 
 def _extract_docx_text(docx_path: str, max_chars: int = None) -> str:
