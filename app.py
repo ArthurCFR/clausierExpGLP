@@ -182,34 +182,18 @@ div.stButton > button:active {
             color: white !important;
         }
         
-        /* Override red border with green - multiple selectors to be sure */
-        .stMultiSelect > div > div > div[data-baseweb="select"] {
-            border-color: #28a745 !important;
+        /* Target the specific Streamlit border classes */
+        .st-f0 {
+            border-bottom-color: #28a745 !important;
         }
-        .stMultiSelect > div > div > div[data-baseweb="select"]:hover {
-            border-color: #28a745 !important;
+        .st-ez {
+            border-top-color: #28a745 !important;
         }
-        .stMultiSelect > div > div > div[data-baseweb="select"]:focus {
-            border-color: #28a745 !important;
-            outline: none !important;
-            box-shadow: 0 0 0 1px #28a745 !important;
+        .st-ey {
+            border-right-color: #28a745 !important;
         }
-        .stMultiSelect > div > div > div[data-baseweb="select"]:focus-within {
-            border-color: #28a745 !important;
-            outline: none !important;
-            box-shadow: 0 0 0 1px #28a745 !important;
-        }
-        
-        /* Target the control element more specifically */
-        .stMultiSelect div[data-baseweb="control"] {
-            border-color: #28a745 !important;
-        }
-        .stMultiSelect div[data-baseweb="control"]:hover {
-            border-color: #28a745 !important;
-        }
-        .stMultiSelect div[data-baseweb="control"]:focus-within {
-            border-color: #28a745 !important;
-            box-shadow: 0 0 0 1px #28a745 !important;
+        .st-ex {
+            border-left-color: #28a745 !important;
         }
         </style>
         """,
