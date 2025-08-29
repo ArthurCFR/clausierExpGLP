@@ -514,10 +514,10 @@ class DocumentMerger:
         payload = {
             "model": "gpt-4o-mini",
             "temperature": 0.3,
-            "max_tokens": 300,
+            "max_tokens": 500,
             "messages": [
-                {"role": "system", "content": "Tu es un assistant juridique. Fais des résumés courts, clairs et factuels en français (5-8 lignes)."},
-                {"role": "user", "content": f"Résume en quelques lignes le contrat suivant (contexte, objet, obligations clés, éléments saillants).\n\nTexte:\n{text}"}
+                {"role": "system", "content": "Tu es un assistant juridique. Produis des synthèses structurées, claires et factuelles en français."},
+                {"role": "user", "content": f"Analyse le contrat suivant et produis une synthèse structurée avec :\n\n## Points clés\n- [Liste des éléments essentiels du contrat en bullet points]\n\n## Conflits\n- [0 à 3 bullet points sur d'éventuelles contradictions entre clauses, ou indiquer \"Aucun conflit de clause détecté\" si tu n'en trouves pas]\n\nNe te sens pas obligé de trouver des conflits s'il n'y en a pas.\n\nTexte:\n{text}"}
             ]
         }
 
