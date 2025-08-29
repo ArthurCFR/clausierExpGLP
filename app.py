@@ -1,6 +1,8 @@
 import streamlit as st
 import os
 import tempfile
+import time
+import random
 from datetime import datetime
 from config import SharePointConfig
 from sharepoint_client import SharePointClient
@@ -591,13 +593,22 @@ div.stButton > button:active {
                 # Sort selected clauses by section order
                 selected_clauses_all.sort(key=lambda x: (x.get('section_order', 999), x['name']))
                 
+                # Show loading GIF
+                gif_placeholder = st.empty()
+                with gif_placeholder.container():
+                    _show_assembly_gif()
+                
                 # Download/copy files
                 if st.session_state.connection_mode == "local":
                     with st.spinner("Copie des clauses locales..."):
                         downloaded_files = active_client.download_selected_clauses(selected_clauses_all)
+                        # Add random delay
+                        time.sleep(random.uniform(1, 3))
                 else:
                     with st.spinner("Téléchargement des clauses depuis SharePoint..."):
                         downloaded_files = active_client.download_selected_clauses(selected_clauses_all)
+                        # Add random delay
+                        time.sleep(random.uniform(1, 3))
                     
                 if downloaded_files or st.session_state.connection_mode == "local":
                     # Merge documents using section-based approach
@@ -620,27 +631,37 @@ div.stButton > button:active {
                                 sections_order
                             )
                             
+                            # Additional delay for assembly
+                            time.sleep(random.uniform(1, 2))
+                            
                             # Generate filename - simple format with custom name + date
                             if custom_filename:
                                 filename = f"{custom_filename}_{datetime.now().strftime('%Y%m%d')}.docx"
                             else:
                                 filename = f"document_{datetime.now().strftime('%Y%m%d')}.docx"
-                            
-                            # Offer download
-                            with open(merged_doc_path, 'rb') as f:
-                                st.download_button(
-                                    label="📥 Télécharger le document assemblé",
-                                    data=f.read(),
-                                    file_name=filename,
-                                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                                )
-                            
-                            st.success("✅ Document assemblé avec succès!")
-                            st.balloons()
+                        
+                        # Hide the GIF
+                        gif_placeholder.empty()
+                        
+                        # Offer download
+                        with open(merged_doc_path, 'rb') as f:
+                            st.download_button(
+                                label="📥 Télécharger le document assemblé",
+                                data=f.read(),
+                                file_name=filename,
+                                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            )
+                        
+                        st.success("✅ Document assemblé avec succès!")
+                        st.balloons()
                             
                     except Exception as e:
+                        # Hide the GIF in case of error
+                        gif_placeholder.empty()
                         st.error(f"❌ Erreur lors de l'assemblage: {str(e)}")
                 else:
+                    # Hide the GIF if no files downloaded
+                    gif_placeholder.empty()
                     st.error("❌ Aucun fichier n'a pu être téléchargé")
         
         else:
@@ -779,6 +800,21 @@ def _get_base64_image(image_path: str) -> str:
             return base64.b64encode(img_file.read()).decode()
     except Exception:
         return ""
+
+def _show_assembly_gif():
+    """Display the puzzle GIF during assembly"""
+    gif_base64 = _get_base64_image("apigee_puzzle.gif")
+    if gif_base64:
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: center; margin-bottom: 10px;">
+                <img src="data:image/gif;base64,{gif_base64}" 
+                     alt="Assemblage en cours..." 
+                     style="width: 60px; height: 60px;">
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 if __name__ == "__main__":
     main()
