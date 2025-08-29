@@ -655,10 +655,12 @@ def _generate_contract_preview(selected_clauses: list) -> str:
                         contract_parts.append(clause_content)
                     else:
                         contract_parts.append("(Contenu non disponible)")
-                    contract_parts.append("\n" + "="*50 + "\n")
+                    contract_parts.append("\n")
+                
+                # Add separator after non-empty section
+                contract_parts.append("="*50 + "\n")
             else:
                 contract_parts.append(": aucune clause sélectionnée\n")
-                contract_parts.append("="*50 + "\n")
         
         # Add uncategorized clauses at the end
         if 'uncategorized' in clauses_by_section:
@@ -670,7 +672,10 @@ def _generate_contract_preview(selected_clauses: list) -> str:
                     contract_parts.append(clause_content)
                 else:
                     contract_parts.append("(Contenu non disponible)")
-                contract_parts.append("\n" + "="*50 + "\n")
+                contract_parts.append("\n")
+            
+            # Add separator after uncategorized section if it has clauses
+            contract_parts.append("="*50 + "\n")
         
         return "\n".join(contract_parts)
         
