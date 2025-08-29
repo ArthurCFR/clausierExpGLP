@@ -82,12 +82,7 @@ class SharePointClient:
         """Download multiple clause files and return list of local paths"""
         downloaded_files = []
         
-        progress_bar = st.progress(0)
-        status_text = st.empty()
-        
         for i, clause in enumerate(selected_clauses):
-            status_text.text(f"Téléchargement: {clause['name']}")
-            
             local_path = self.download_clause_file(
                 clause['server_relative_url'], 
                 clause['file_name']
@@ -95,10 +90,6 @@ class SharePointClient:
             
             if local_path:
                 downloaded_files.append(local_path)
-            
-            progress_bar.progress((i + 1) / len(selected_clauses))
-        
-        status_text.text("Téléchargement terminé!")
         return downloaded_files
     
     def _extract_section_tag(self, clause_name: str) -> Optional[str]:

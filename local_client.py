@@ -149,12 +149,7 @@ class LocalClauseClient:
         if not selected_clauses:
             return downloaded_files
         
-        progress_bar = st.progress(0)
-        status_text = st.empty()
-        
         for i, clause in enumerate(selected_clauses):
-            status_text.text(f"Copie: {clause['name']}")
-            
             try:
                 source_path = clause['file_path']
                 temp_filename = f"{i+1:03d}_{clause['file_name']}"
@@ -166,10 +161,6 @@ class LocalClauseClient:
             except Exception as e:
                 st.warning(f"Erreur lors de la copie de {clause['name']}: {str(e)}")
                 continue
-            
-            progress_bar.progress((i + 1) / len(selected_clauses))
-        
-        status_text.text("Copie terminée!")
         return downloaded_files
     
     def cleanup(self):

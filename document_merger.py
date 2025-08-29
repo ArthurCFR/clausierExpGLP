@@ -43,12 +43,7 @@ class DocumentMerger:
         # Find insertion point (after existing content)
         insertion_point = len(final_doc.paragraphs)
         
-        progress_bar = st.progress(0)
-        status_text = st.empty()
-        
         for i, (file_path, clause_name) in enumerate(zip(file_paths, clause_names)):
-            status_text.text(f"Fusion en cours: {clause_name}")
-            
             try:
                 # Add section header with custom styling and insert after it
                 header_para = self._add_section_header(final_doc, clause_name.upper())
@@ -70,8 +65,6 @@ class DocumentMerger:
             except Exception as e:
                 st.warning(f"Erreur lors de la fusion de {clause_name}: {str(e)}")
                 continue
-            
-            progress_bar.progress((i + 1) / len(file_paths))
         
         # Save merged document
         output_path = os.path.join(self.output_dir, 'document_final.docx')
@@ -114,9 +107,6 @@ class DocumentMerger:
             st.warning(f"Template non trouvé: {self.template_path}, utilisation d'un document vide")
             final_doc = Document()
         
-        progress_bar = st.progress(0)
-        status_text = st.empty()
-        
         total_sections = len([s for s in sections_order if clauses_by_section.get(s['key'], [])])
         current_section = 0
         displayed_index = 0  # Dynamic numbering counter for displayed sections only
@@ -129,7 +119,6 @@ class DocumentMerger:
                 
             current_section += 1
             displayed_index += 1
-            status_text.text(f"Traitement section: {section['name']} ({len(section_clauses)} clause(s))")
             
             # Add section title and create an anchor right after
             header_para = self._add_section_header(final_doc, f"{displayed_index}. {section['name'].upper()}")
@@ -158,13 +147,9 @@ class DocumentMerger:
                 final_doc.add_paragraph()  # First line break
                 final_doc.add_paragraph()  # Second line break
             
-            progress_bar.progress(current_section / total_sections)
-        
         # Save merged document
         output_path = os.path.join(self.output_dir, 'document_final.docx')
         final_doc.save(output_path)
-        
-        status_text.text("Fusion terminée!")
         # Try to generate and embed a brief summary
         if self.enable_summary:
             try:
