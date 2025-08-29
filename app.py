@@ -600,13 +600,13 @@ div.stButton > button:active {
                 
             # Assembly button outside the columns
             if selected_clauses_all and st.button("🔗 Assembler les clauses", type="primary"):
-                # Sort selected clauses by section order
-                selected_clauses_all.sort(key=lambda x: (x.get('section_order', 999), x['name']))
-                
-                # Show loading GIF
+                # Show loading GIF immediately
                 gif_placeholder = st.empty()
                 with gif_placeholder.container():
                     _show_assembly_gif()
+                
+                # Sort selected clauses by section order
+                selected_clauses_all.sort(key=lambda x: (x.get('section_order', 999), x['name']))
                 
                 # Download/copy files
                 if st.session_state.connection_mode == "local":
@@ -647,8 +647,8 @@ div.stButton > button:active {
                         else:
                             filename = f"document_{datetime.now().strftime('%Y%m%d')}.docx"
                         
-                        # Hide the GIF
-                        gif_placeholder.empty()
+                        # Hide the GIF with fade out
+                        _hide_assembly_gif(gif_placeholder)
                         
                         # Offer download
                         with open(merged_doc_path, 'rb') as f:
@@ -664,11 +664,11 @@ div.stButton > button:active {
                             
                     except Exception as e:
                         # Hide the GIF in case of error
-                        gif_placeholder.empty()
+                        _hide_assembly_gif(gif_placeholder)
                         st.error(f"❌ Erreur lors de l'assemblage: {str(e)}")
                 else:
                     # Hide the GIF if no files downloaded
-                    gif_placeholder.empty()
+                    _hide_assembly_gif(gif_placeholder)
                     st.error("❌ Aucun fichier n'a pu être téléchargé")
         
         else:
@@ -809,7 +809,7 @@ def _get_base64_image(image_path: str) -> str:
         return ""
 
 def _show_assembly_gif():
-    """Display the puzzle GIF during assembly"""
+    """Display the puzzle GIF during assembly with fade in effect"""
     gif_base64 = _get_base64_image("apigee_puzzle.gif")
     if gif_base64:
         st.markdown(
@@ -817,11 +817,46 @@ def _show_assembly_gif():
             <div style="display: flex; justify-content: flex-start; margin-bottom: 15px;">
                 <img src="data:image/gif;base64,{gif_base64}" 
                      alt="Assemblage en cours..." 
-                     style="width: 300px; height: auto; max-width: 100%;">
+                     style="width: 300px; height: auto; max-width: 100%; 
+                            opacity: 0; animation: fadeIn 0.2s ease-in forwards;">
             </div>
+            <style>
+            @keyframes fadeIn {{
+                from {{ opacity: 0; }}
+                to {{ opacity: 1; }}
+            }}
+            @keyframes fadeOut {{
+                from {{ opacity: 1; }}
+                to {{ opacity: 0; }}
+            }}
+            </style>
             """,
             unsafe_allow_html=True
         )
+
+def _hide_assembly_gif(gif_placeholder):
+    """Hide the puzzle GIF with fade out effect"""
+    gif_base64 = _get_base64_image("apigee_puzzle.gif")
+    if gif_base64:
+        gif_placeholder.markdown(
+            f"""
+            <div style="display: flex; justify-content: flex-start; margin-bottom: 15px;">
+                <img src="data:image/gif;base64,{gif_base64}" 
+                     alt="Assemblage en cours..." 
+                     style="width: 300px; height: auto; max-width: 100%; 
+                            opacity: 1; animation: fadeOut 0.2s ease-out forwards;">
+            </div>
+            <style>
+            @keyframes fadeOut {{
+                from {{ opacity: 1; }}
+                to {{ opacity: 0; }}
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+        time.sleep(0.2)  # Wait for fade out to complete
+        gif_placeholder.empty()
 
 if __name__ == "__main__":
     main()
