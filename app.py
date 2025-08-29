@@ -2,7 +2,6 @@ import streamlit as st
 import os
 import tempfile
 import time
-import random
 from datetime import datetime
 from config import SharePointConfig
 from sharepoint_client import SharePointClient
@@ -600,45 +599,42 @@ div.stButton > button:active {
                 
                 # Download/copy files
                 if st.session_state.connection_mode == "local":
-                    with st.spinner("Copie des clauses locales..."):
-                        downloaded_files = active_client.download_selected_clauses(selected_clauses_all)
-                        # Fixed delay
-                        time.sleep(3)
+                    downloaded_files = active_client.download_selected_clauses(selected_clauses_all)
+                    # Fixed delay
+                    time.sleep(3)
                 else:
-                    with st.spinner("Téléchargement des clauses depuis SharePoint..."):
-                        downloaded_files = active_client.download_selected_clauses(selected_clauses_all)
-                        # Fixed delay
-                        time.sleep(3)
+                    downloaded_files = active_client.download_selected_clauses(selected_clauses_all)
+                    # Fixed delay
+                    time.sleep(3)
                     
                 if downloaded_files or st.session_state.connection_mode == "local":
                     # Merge documents using section-based approach
                     try:
-                        with st.spinner("Assemblage des clauses avec template..."):
-                            # Organize selected clauses by section
-                            selected_by_section = {}
-                            for clause in selected_clauses_all:
-                                section_key = clause.get('section_tag', 'uncategorized')
-                                if section_key not in selected_by_section:
-                                    selected_by_section[section_key] = []
-                                selected_by_section[section_key].append(clause)
-                            
-                            # Get sections in order
-                            sections_order = st.session_state.parties_parser.get_sections()
-                            
-                            # Use new section-based merge method
-                            merged_doc_path = st.session_state.merger.merge_documents_by_sections(
-                                selected_by_section,
-                                sections_order
-                            )
-                            
-                            # Fixed delay for assembly
-                            time.sleep(3)
-                            
-                            # Generate filename - simple format with custom name + date
-                            if custom_filename:
-                                filename = f"{custom_filename}_{datetime.now().strftime('%Y%m%d')}.docx"
-                            else:
-                                filename = f"document_{datetime.now().strftime('%Y%m%d')}.docx"
+                        # Organize selected clauses by section
+                        selected_by_section = {}
+                        for clause in selected_clauses_all:
+                            section_key = clause.get('section_tag', 'uncategorized')
+                            if section_key not in selected_by_section:
+                                selected_by_section[section_key] = []
+                            selected_by_section[section_key].append(clause)
+                        
+                        # Get sections in order
+                        sections_order = st.session_state.parties_parser.get_sections()
+                        
+                        # Use new section-based merge method
+                        merged_doc_path = st.session_state.merger.merge_documents_by_sections(
+                            selected_by_section,
+                            sections_order
+                        )
+                        
+                        # Fixed delay for assembly
+                        time.sleep(3)
+                        
+                        # Generate filename - simple format with custom name + date
+                        if custom_filename:
+                            filename = f"{custom_filename}_{datetime.now().strftime('%Y%m%d')}.docx"
+                        else:
+                            filename = f"document_{datetime.now().strftime('%Y%m%d')}.docx"
                         
                         # Hide the GIF
                         gif_placeholder.empty()
