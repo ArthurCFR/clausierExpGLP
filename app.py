@@ -182,24 +182,18 @@ div.stButton > button:active {
             color: white !important;
         }
         
-        /* Change multiselect border/outline when focused/clicked */
-        .stMultiSelect div[data-baseweb="select"] {
+        /* Change multiselect border when focused/clicked - remove red outline */
+        .stMultiSelect div[data-baseweb="select"]:focus-within {
             border-color: #28a745 !important;
+            box-shadow: none !important;
         }
         .stMultiSelect div[data-baseweb="select"]:focus {
             border-color: #28a745 !important;
-            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+            box-shadow: none !important;
         }
-        .stMultiSelect div[data-baseweb="select"]:focus-within {
+        div[data-testid="stMultiSelect"] div[data-baseweb="select"]:focus-within {
             border-color: #28a745 !important;
-            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
-        }
-        div[data-testid="stMultiSelect"] div[data-baseweb="select"] {
-            border-color: #28a745 !important;
-        }
-        div[data-testid="stMultiSelect"] div[data-baseweb="select"]:focus {
-            border-color: #28a745 !important;
-            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+            box-shadow: none !important;
         }
         </style>
         """,
