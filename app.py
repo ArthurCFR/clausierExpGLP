@@ -602,13 +602,13 @@ div.stButton > button:active {
                 if st.session_state.connection_mode == "local":
                     with st.spinner("Copie des clauses locales..."):
                         downloaded_files = active_client.download_selected_clauses(selected_clauses_all)
-                        # Add random delay
-                        time.sleep(random.uniform(1, 3))
+                        # Fixed delay
+                        time.sleep(3)
                 else:
                     with st.spinner("Téléchargement des clauses depuis SharePoint..."):
                         downloaded_files = active_client.download_selected_clauses(selected_clauses_all)
-                        # Add random delay
-                        time.sleep(random.uniform(1, 3))
+                        # Fixed delay
+                        time.sleep(3)
                     
                 if downloaded_files or st.session_state.connection_mode == "local":
                     # Merge documents using section-based approach
@@ -631,8 +631,8 @@ div.stButton > button:active {
                                 sections_order
                             )
                             
-                            # Additional delay for assembly
-                            time.sleep(random.uniform(1, 2))
+                            # Fixed delay for assembly
+                            time.sleep(3)
                             
                             # Generate filename - simple format with custom name + date
                             if custom_filename:
@@ -807,10 +807,10 @@ def _show_assembly_gif():
     if gif_base64:
         st.markdown(
             f"""
-            <div style="display: flex; justify-content: center; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: center; margin-bottom: 15px;">
                 <img src="data:image/gif;base64,{gif_base64}" 
                      alt="Assemblage en cours..." 
-                     style="width: 60px; height: 60px;">
+                     style="width: 300px; height: auto; max-width: 100%;">
             </div>
             """,
             unsafe_allow_html=True
