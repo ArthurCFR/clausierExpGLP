@@ -148,12 +148,37 @@ div.stButton > button:active {
     st.markdown(
         """
         <style>
-        /* Style selected items in multiselect */
+        /* Style selected items in multiselect - different selectors to cover all cases */
         .stMultiSelect div[data-baseweb="select"] div[data-baseweb="tag"] {
             background-color: #28a745 !important;
             color: white !important;
         }
         .stMultiSelect div[data-baseweb="select"] div[data-baseweb="tag"] span {
+            color: white !important;
+        }
+        
+        /* Alternative selectors for selected tags */
+        .stMultiSelect span[data-baseweb="tag"] {
+            background-color: #28a745 !important;
+            color: white !important;
+        }
+        .stMultiSelect span[data-baseweb="tag"] span {
+            color: white !important;
+        }
+        
+        /* More specific selectors */
+        div[data-testid="stMultiSelect"] div[data-baseweb="tag"] {
+            background-color: #28a745 !important;
+            color: white !important;
+        }
+        div[data-testid="stMultiSelect"] span[data-baseweb="tag"] {
+            background-color: #28a745 !important;
+            color: white !important;
+        }
+        
+        /* Target the tag background and text color more specifically */
+        .stMultiSelect [role="option"][aria-selected="true"] {
+            background-color: #28a745 !important;
             color: white !important;
         }
         </style>
