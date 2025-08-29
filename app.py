@@ -645,9 +645,9 @@ def _generate_contract_preview(selected_clauses: list) -> str:
         # Process sections in order
         for section in sections:
             section_key = section['key']
+            contract_parts.append(f"\n--- {section['order']}. {section['name']} ---\n")
+            
             if section_key in clauses_by_section:
-                contract_parts.append(f"\n--- {section['order']}. {section['name']} ---\n")
-                
                 for clause in clauses_by_section[section_key]:
                     contract_parts.append(f"\n[{clause['name']}]\n")
                     clause_content = _get_clause_preview(clause)
@@ -656,6 +656,9 @@ def _generate_contract_preview(selected_clauses: list) -> str:
                     else:
                         contract_parts.append("(Contenu non disponible)")
                     contract_parts.append("\n" + "="*50 + "\n")
+            else:
+                contract_parts.append(": aucune clause sélectionnée\n")
+                contract_parts.append("="*50 + "\n")
         
         # Add uncategorized clauses at the end
         if 'uncategorized' in clauses_by_section:
