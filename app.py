@@ -809,25 +809,47 @@ def _get_base64_image(image_path: str) -> str:
         return ""
 
 def _show_assembly_gif():
-    """Display the puzzle GIF during assembly with fade in effect"""
+    """Display the puzzle GIF during assembly with fade in and scale effect"""
     gif_base64 = _get_base64_image("apigee_puzzle.gif")
     if gif_base64:
         st.markdown(
             f"""
-            <div style="display: flex; justify-content: flex-start; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: flex-start; margin-bottom: 15px; 
+                        height: 0; overflow: hidden; animation: expandHeight 0.2s ease-out forwards;">
                 <img src="data:image/gif;base64,{gif_base64}" 
                      alt="Assemblage en cours..." 
                      style="width: 300px; height: auto; max-width: 100%; 
-                            opacity: 0; animation: fadeIn 0.2s ease-in forwards;">
+                            opacity: 0; transform: scale(0); 
+                            animation: fadeInScale 0.2s ease-out forwards;">
             </div>
             <style>
-            @keyframes fadeIn {{
-                from {{ opacity: 0; }}
-                to {{ opacity: 1; }}
+            @keyframes fadeInScale {{
+                from {{ 
+                    opacity: 0; 
+                    transform: scale(0);
+                }}
+                to {{ 
+                    opacity: 1; 
+                    transform: scale(1);
+                }}
             }}
-            @keyframes fadeOut {{
-                from {{ opacity: 1; }}
-                to {{ opacity: 0; }}
+            @keyframes expandHeight {{
+                from {{ height: 0; }}
+                to {{ height: auto; }}
+            }}
+            @keyframes fadeOutScale {{
+                from {{ 
+                    opacity: 1; 
+                    transform: scale(1);
+                }}
+                to {{ 
+                    opacity: 0; 
+                    transform: scale(0);
+                }}
+            }}
+            @keyframes collapseHeight {{
+                from {{ height: auto; }}
+                to {{ height: 0; }}
             }}
             </style>
             """,
@@ -835,21 +857,33 @@ def _show_assembly_gif():
         )
 
 def _hide_assembly_gif(gif_placeholder):
-    """Hide the puzzle GIF with fade out effect"""
+    """Hide the puzzle GIF with fade out and scale effect"""
     gif_base64 = _get_base64_image("apigee_puzzle.gif")
     if gif_base64:
         gif_placeholder.markdown(
             f"""
-            <div style="display: flex; justify-content: flex-start; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: flex-start; margin-bottom: 15px;
+                        animation: collapseHeight 0.2s ease-out forwards;">
                 <img src="data:image/gif;base64,{gif_base64}" 
                      alt="Assemblage en cours..." 
                      style="width: 300px; height: auto; max-width: 100%; 
-                            opacity: 1; animation: fadeOut 0.2s ease-out forwards;">
+                            opacity: 1; transform: scale(1);
+                            animation: fadeOutScale 0.2s ease-out forwards;">
             </div>
             <style>
-            @keyframes fadeOut {{
-                from {{ opacity: 1; }}
-                to {{ opacity: 0; }}
+            @keyframes fadeOutScale {{
+                from {{ 
+                    opacity: 1; 
+                    transform: scale(1);
+                }}
+                to {{ 
+                    opacity: 0; 
+                    transform: scale(0);
+                }}
+            }}
+            @keyframes collapseHeight {{
+                from {{ height: auto; }}
+                to {{ height: 0; }}
             }}
             </style>
             """,
