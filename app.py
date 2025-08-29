@@ -3,12 +3,12 @@ import os
 import tempfile
 import time
 from datetime import datetime
-from config import SharePointConfig
-from sharepoint_client import SharePointClient
-from local_client import LocalClauseClient
-from document_merger import DocumentMerger
-from parties_parser import PartiesParser
-from doc_converter import DocConverter
+from src.config import SharePointConfig
+from src.sharepoint_client import SharePointClient
+from src.local_client import LocalClauseClient
+from src.document_merger import DocumentMerger
+from src.parties_parser import PartiesParser
+from src.doc_converter import DocConverter
 from docx import Document
 import html
 
@@ -141,6 +141,25 @@ div.stButton > button:active {
 
     st.title("🎆 Agrégateur de clauses")
     st.markdown("*Sélectionnez et assemblez vos clauses contractuelles par section*")
+    
+    # Initialize AI summary toggle state if not exists
+    if 'ai_summary_enabled' not in st.session_state:
+        st.session_state.ai_summary_enabled = False
+        if hasattr(st.session_state, 'merger'):
+            st.session_state.ai_summary_enabled = st.session_state.merger.enable_summary
+    
+    # AI Summary toggle at the top
+    enable_summary = st.toggle(
+        "Générer une synthèse IA du contrat", 
+        value=st.session_state.ai_summary_enabled,
+        key="ai_summary_toggle_top"
+    )
+    
+    # Only update if actually changed
+    if enable_summary != st.session_state.ai_summary_enabled:
+        st.session_state.ai_summary_enabled = enable_summary
+        if hasattr(st.session_state, 'merger'):
+            st.session_state.merger.enable_summary = enable_summary
     
     # CSS for styling multiselect selected items in green
     st.markdown(
@@ -594,21 +613,6 @@ div.stButton > button:active {
                 st.markdown("---")
                 
                 # Configuration options
-                
-                # Initialize AI summary toggle state if not exists
-                if 'ai_summary_enabled' not in st.session_state:
-                    st.session_state.ai_summary_enabled = st.session_state.merger.enable_summary
-                    
-                enable_summary = st.toggle(
-                    "Générer une synthèse IA du contrat", 
-                    value=st.session_state.ai_summary_enabled,
-                    key="ai_summary_toggle"
-                )
-                
-                # Only update if actually changed
-                if enable_summary != st.session_state.ai_summary_enabled:
-                    st.session_state.ai_summary_enabled = enable_summary
-                    st.session_state.merger.enable_summary = enable_summary
                 custom_filename = st.text_input(
                     "Nom du fichier (optionnel):",
                     placeholder="document_final"
@@ -834,6 +838,9 @@ def _get_base64_image(image_path: str) -> str:
     """Convert image to base64 string for embedding in HTML"""
     import base64
     try:
+        # Update path to use assets folder
+        if not image_path.startswith('assets/'):
+            image_path = f"assets/{image_path}"
         with open(image_path, "rb") as img_file:
             return base64.b64encode(img_file.read()).decode()
     except Exception:

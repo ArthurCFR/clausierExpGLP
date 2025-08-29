@@ -3,8 +3,8 @@ import tempfile
 import shutil
 from typing import List, Dict, Optional
 import streamlit as st
-from parties_parser import PartiesParser
-from doc_converter import DocConverter
+from .parties_parser import PartiesParser
+from .doc_converter import DocConverter
 
 class LocalClauseClient:
     """Client for reading clauses from local directory structure"""

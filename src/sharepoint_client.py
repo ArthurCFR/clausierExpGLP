@@ -6,8 +6,8 @@ from office365.runtime.auth.user_credential import UserCredential
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.files.file import File
 import streamlit as st
-from config import SharePointConfig
-from parties_parser import PartiesParser
+from .config import SharePointConfig
+from .parties_parser import PartiesParser
 
 class SharePointClient:
     """Client for interacting with SharePoint documents"""

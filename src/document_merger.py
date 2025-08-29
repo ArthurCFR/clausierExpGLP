@@ -8,7 +8,7 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.shared import OxmlElement, qn
 import streamlit as st
-from doc_converter import DocConverter
+from .doc_converter import DocConverter
 
 class DocumentMerger:
     """Handle merging of Word documents containing clauses"""
