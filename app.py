@@ -207,6 +207,25 @@ div.stButton > button:active {
         .progress {
             display: none !important;
         }
+        
+        /* Style assembly buttons in green */
+        div.stButton > button[kind="primary"] {
+            background-color: #28a745 !important;
+            border-color: #28a745 !important;
+            color: white !important;
+        }
+        div.stButton > button[kind="primary"]:hover {
+            background-color: #218838 !important;
+            border-color: #1e7e34 !important;
+            color: white !important;
+        }
+        div.stButton > button[kind="primary"]:active,
+        div.stButton > button[kind="primary"]:focus {
+            background-color: #1e7e34 !important;
+            border-color: #1c7430 !important;
+            color: white !important;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.5) !important;
+        }
         </style>
         """,
         unsafe_allow_html=True
@@ -386,7 +405,7 @@ div.stButton > button:active {
                 default=[clause['name'] for clause in demo_clauses]
             )
             
-            if selected_demo_clauses and st.button("🔗 Assembler les clauses (Mode Démo)"):
+            if selected_demo_clauses and st.button("🧩 Assembler les clauses (Mode Démo)"):
                 # Save uploaded files temporarily
                 temp_files = []
                 selected_names = []
@@ -599,7 +618,7 @@ div.stButton > button:active {
                 )
                 
             # Assembly button outside the columns
-            if selected_clauses_all and st.button("🔗 Assembler les clauses", type="primary"):
+            if selected_clauses_all and st.button("🧩 Assembler les clauses", type="primary"):
                 # Show loading GIF immediately
                 gif_placeholder = st.empty()
                 with gif_placeholder.container():
