@@ -600,7 +600,16 @@ class DocumentMerger:
         for line in summary_text.split('\n'):
             p = Document().add_paragraph()
             r = p.add_run(line)
-            r.font.name = 'Montserrat Medium'
+            
+            # Apply bold formatting to section titles
+            line_upper = line.upper().strip()
+            if line_upper in ['POINTS CLÉS', 'POINTS CLES', 'CONFLITS']:
+                r.font.name = 'Montserrat ExtraBold'
+                r.font.bold = True
+                p.space_before = Pt(6)
+            else:
+                r.font.name = 'Montserrat Medium'
+            
             r.font.size = Pt(11)
             r.font.color.rgb = RGBColor(0x00, 0x3D, 0xA5)
             p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
@@ -650,7 +659,16 @@ class DocumentMerger:
             for line in summary_text.split('\n'):
                 p = Document().add_paragraph()
                 r = p.add_run(line)
-                r.font.name = 'Montserrat Medium'
+                
+                # Apply bold formatting to section titles
+                line_upper = line.upper().strip()
+                if line_upper in ['POINTS CLÉS', 'POINTS CLES', 'CONFLITS']:
+                    r.font.name = 'Montserrat ExtraBold'
+                    r.font.bold = True
+                    p.space_before = Pt(6)
+                else:
+                    r.font.name = 'Montserrat Medium'
+                
                 r.font.size = Pt(11)
                 r.font.color.rgb = RGBColor(0x00, 0x3D, 0xA5)
                 p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
@@ -666,7 +684,16 @@ class DocumentMerger:
         for line in summary_text.split('\n'):
             p = Document().add_paragraph()
             r = p.add_run(line)
-            r.font.name = 'Montserrat Medium'
+            
+            # Apply bold formatting to section titles
+            line_upper = line.upper().strip()
+            if line_upper in ['POINTS CLÉS', 'POINTS CLES', 'CONFLITS']:
+                r.font.name = 'Montserrat ExtraBold'
+                r.font.bold = True
+                p.space_before = Pt(6)
+            else:
+                r.font.name = 'Montserrat Medium'
+            
             r.font.size = Pt(11)
             r.font.color.rgb = RGBColor(0x00, 0x3D, 0xA5)
             p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
