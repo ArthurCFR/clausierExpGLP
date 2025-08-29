@@ -133,10 +133,10 @@ div.stButton > button:active {
             unsafe_allow_html=True
         )
         
-        # Use Streamlit columns for button centering
-        col1, col2, col3 = st.columns([1, 1, 1])
+        # Use Streamlit columns with better proportions for true centering
+        col1, col2, col3 = st.columns([2, 1, 2])
         with col2:
-            if st.button("Commencer un contrat", key="start_contract"):
+            if st.button("Commencer un contrat", key="start_contract", use_container_width=True):
                 st.session_state.show_intro = False
                 st.rerun()
         return
@@ -177,6 +177,7 @@ div.stButton > button:active {
         )
         if st.button("Fermer l'aperçu", key="close_preview_panel"):
             st.session_state.hide_preview = True
+            st.rerun()
     
     # Sidebar for configuration
     with st.sidebar:
@@ -493,9 +494,20 @@ div.stButton > button:active {
                 
                 # Configuration options
                 
-                enable_summary = st.toggle("Générer une synthèse IA du contrat", value=st.session_state.merger.enable_summary)
-                # Keep merger flag in sync
-                st.session_state.merger.enable_summary = enable_summary
+                # Initialize AI summary toggle state if not exists
+                if 'ai_summary_enabled' not in st.session_state:
+                    st.session_state.ai_summary_enabled = st.session_state.merger.enable_summary
+                    
+                enable_summary = st.toggle(
+                    "Générer une synthèse IA du contrat", 
+                    value=st.session_state.ai_summary_enabled,
+                    key="ai_summary_toggle"
+                )
+                
+                # Only update if actually changed
+                if enable_summary != st.session_state.ai_summary_enabled:
+                    st.session_state.ai_summary_enabled = enable_summary
+                    st.session_state.merger.enable_summary = enable_summary
                 custom_filename = st.text_input(
                     "Nom du fichier (optionnel):",
                     placeholder="document_final"
