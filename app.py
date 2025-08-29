@@ -182,18 +182,34 @@ div.stButton > button:active {
             color: white !important;
         }
         
-        /* Change multiselect border when focused/clicked - remove red outline */
-        .stMultiSelect div[data-baseweb="select"]:focus-within {
+        /* Override red border with green - multiple selectors to be sure */
+        .stMultiSelect > div > div > div[data-baseweb="select"] {
             border-color: #28a745 !important;
-            box-shadow: none !important;
         }
-        .stMultiSelect div[data-baseweb="select"]:focus {
+        .stMultiSelect > div > div > div[data-baseweb="select"]:hover {
             border-color: #28a745 !important;
-            box-shadow: none !important;
         }
-        div[data-testid="stMultiSelect"] div[data-baseweb="select"]:focus-within {
+        .stMultiSelect > div > div > div[data-baseweb="select"]:focus {
             border-color: #28a745 !important;
-            box-shadow: none !important;
+            outline: none !important;
+            box-shadow: 0 0 0 1px #28a745 !important;
+        }
+        .stMultiSelect > div > div > div[data-baseweb="select"]:focus-within {
+            border-color: #28a745 !important;
+            outline: none !important;
+            box-shadow: 0 0 0 1px #28a745 !important;
+        }
+        
+        /* Target the control element more specifically */
+        .stMultiSelect div[data-baseweb="control"] {
+            border-color: #28a745 !important;
+        }
+        .stMultiSelect div[data-baseweb="control"]:hover {
+            border-color: #28a745 !important;
+        }
+        .stMultiSelect div[data-baseweb="control"]:focus-within {
+            border-color: #28a745 !important;
+            box-shadow: 0 0 0 1px #28a745 !important;
         }
         </style>
         """,
