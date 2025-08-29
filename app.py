@@ -144,6 +144,23 @@ div.stButton > button:active {
     st.title("🎆 Agrégateur de clauses")
     st.markdown("*Sélectionnez et assemblez vos clauses contractuelles par section*")
     
+    # CSS for styling multiselect selected items in green
+    st.markdown(
+        """
+        <style>
+        /* Style selected items in multiselect */
+        .stMultiSelect div[data-baseweb="select"] div[data-baseweb="tag"] {
+            background-color: #28a745 !important;
+            color: white !important;
+        }
+        .stMultiSelect div[data-baseweb="select"] div[data-baseweb="tag"] span {
+            color: white !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    
     # Initialize session state
     if 'sharepoint_client' not in st.session_state:
         st.session_state.sharepoint_client = None
@@ -643,7 +660,7 @@ def _generate_contract_preview(selected_clauses: list) -> str:
         contract_parts.append("=== APERÇU DU CONTRAT COMPLET ===\n")
         
         # Process sections in order
-        for section in sections:
+        for i, section in enumerate(sections):
             section_key = section['key']
             
             if section_key in clauses_by_section:
@@ -662,6 +679,21 @@ def _generate_contract_preview(selected_clauses: list) -> str:
                 contract_parts.append("="*50 + "\n")
             else:
                 contract_parts.append(f"\n**--- {section['order']}. {section['name']} ---** : aucune clause sélectionnée\n")
+                
+                # Add separator after empty section if next section has content
+                next_section_has_content = False
+                for j in range(i + 1, len(sections)):
+                    next_section_key = sections[j]['key']
+                    if next_section_key in clauses_by_section:
+                        next_section_has_content = True
+                        break
+                
+                # Also check if uncategorized section exists
+                if not next_section_has_content and 'uncategorized' in clauses_by_section:
+                    next_section_has_content = True
+                
+                if next_section_has_content:
+                    contract_parts.append("="*50 + "\n")
         
         # Add uncategorized clauses at the end
         if 'uncategorized' in clauses_by_section:
