@@ -33,6 +33,9 @@ class LocalClauseClient:
                 
                 # Find all .doc and .docx files in this section
                 for filename in os.listdir(section_path):
+                    # Skip temporary Word files (start with ~$)
+                    if filename.startswith('~$'):
+                        continue
                     if filename.endswith(('.doc', '.docx')):
                         file_path = os.path.join(section_path, filename)
                         
