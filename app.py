@@ -130,15 +130,6 @@ div.stButton > button:active {
             unsafe_allow_html=True,
         )
 
-        # Logo La Poste (affiché avant le bouton pour éviter le flash)
-        st.markdown(
-            """
-            <div class="logo-container">
-                <img src="data:image/png;base64,{}" alt="Logo La Poste">
-            </div>
-            """.format(_get_base64_image("la_poste-logo-freelogovectors.net_.png")),
-            unsafe_allow_html=True
-        )
         
         # Use Streamlit columns with better proportions for true centering
         col1, col2, col3 = st.columns([1, 1, 1])
