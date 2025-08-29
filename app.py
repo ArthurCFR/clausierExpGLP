@@ -196,6 +196,17 @@ div.stButton > button:active {
         .st-ex {
             border-left-color: #28a745 !important;
         }
+        
+        /* Hide Streamlit progress bars */
+        .stProgress {
+            display: none !important;
+        }
+        div[data-testid="stProgress"] {
+            display: none !important;
+        }
+        .progress {
+            display: none !important;
+        }
         </style>
         """,
         unsafe_allow_html=True
@@ -601,11 +612,11 @@ div.stButton > button:active {
                 if st.session_state.connection_mode == "local":
                     downloaded_files = active_client.download_selected_clauses(selected_clauses_all)
                     # Fixed delay
-                    time.sleep(3)
+                    time.sleep(1.5)
                 else:
                     downloaded_files = active_client.download_selected_clauses(selected_clauses_all)
                     # Fixed delay
-                    time.sleep(3)
+                    time.sleep(1.5)
                     
                 if downloaded_files or st.session_state.connection_mode == "local":
                     # Merge documents using section-based approach
@@ -628,7 +639,7 @@ div.stButton > button:active {
                         )
                         
                         # Fixed delay for assembly
-                        time.sleep(3)
+                        time.sleep(1.5)
                         
                         # Generate filename - simple format with custom name + date
                         if custom_filename:
@@ -803,7 +814,7 @@ def _show_assembly_gif():
     if gif_base64:
         st.markdown(
             f"""
-            <div style="display: flex; justify-content: center; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: flex-start; margin-bottom: 15px;">
                 <img src="data:image/gif;base64,{gif_base64}" 
                      alt="Assemblage en cours..." 
                      style="width: 300px; height: auto; max-width: 100%;">
