@@ -259,7 +259,7 @@ div.stButton > button:active {
     if 'merger' not in st.session_state:
         st.session_state.merger = DocumentMerger(enable_summary=False)
     if 'parties_parser' not in st.session_state:
-        st.session_state.parties_parser = PartiesParser()
+        st.session_state.parties_parser = PartiesParser("config/parties.ini")
     if 'connection_mode' not in st.session_state:
         st.session_state.connection_mode = "local"
     if 'preview_converter' not in st.session_state:

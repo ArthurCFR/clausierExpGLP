@@ -11,7 +11,7 @@ class LocalClauseClient:
     
     def __init__(self, clauses_dir: str = "clauses"):
         self.clauses_dir = clauses_dir
-        self.parties_parser = PartiesParser()
+        self.parties_parser = PartiesParser("config/parties.ini")
         self._temp_dir = tempfile.mkdtemp()
         self.doc_converter = DocConverter()
     
