@@ -242,7 +242,153 @@ div.stButton > button:active {
             color: white !important;
             box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.5) !important;
         }
+        
+        /* Tooltip styles for clause preview */
+        .clause-tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .clause-tooltip .tooltip-content {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            z-index: 9999;
+            background-color: #fff;
+            color: #333;
+            text-align: left;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            padding: 12px;
+            min-width: 300px;
+            max-width: 500px;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            font-size: 13px;
+            line-height: 1.4;
+            transition: opacity 0.2s, visibility 0.2s;
+            white-space: pre-wrap;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 100%;
+            margin-bottom: 8px;
+        }
+        
+        .clause-tooltip:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .clause-tooltip .tooltip-content::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px;
+            border-style: solid;
+            border-color: #28a745 transparent transparent transparent;
+        }
+        
+        /* Style multiselect options to enable hover tooltips */
+        .stMultiSelect div[data-baseweb="select"] {
+            position: relative;
+        }
+        
+        /* Loading tooltip style */
+        .tooltip-loading {
+            font-style: italic;
+            color: #666;
+        }
         </style>
+        <script>
+        // Store clause previews globally
+        window.clausePreviews = window.clausePreviews || {};
+        
+        function initializeTooltips() {
+            // Find all multiselect options
+            const multiSelects = document.querySelectorAll('[data-testid="stMultiSelect"]');
+            
+            multiSelects.forEach(multiSelect => {
+                // Watch for changes in the multiselect dropdown
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'childList') {
+                            addTooltipsToOptions();
+                        }
+                    });
+                });
+                
+                observer.observe(multiSelect, {
+                    childList: true,
+                    subtree: true
+                });
+            });
+            
+            // Initial setup
+            addTooltipsToOptions();
+        }
+        
+        function addTooltipsToOptions() {
+            // Find all options in multiselect dropdowns
+            const options = document.querySelectorAll('[role="option"]');
+            
+            options.forEach(option => {
+                // Skip if already has tooltip
+                if (option.classList.contains('has-tooltip')) return;
+                
+                option.classList.add('has-tooltip');
+                
+                // Create tooltip wrapper
+                const wrapper = document.createElement('div');
+                wrapper.className = 'clause-tooltip';
+                
+                // Create tooltip content
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip-content';
+                tooltip.innerHTML = '<div class="tooltip-loading">Chargement de l\'aperçu...</div>';
+                
+                // Wrap the option
+                option.parentNode.insertBefore(wrapper, option);
+                wrapper.appendChild(option);
+                wrapper.appendChild(tooltip);
+                
+                // Get clause name from option text
+                const clauseName = option.textContent.replace(' ⚠️', '').trim();
+                
+                // Load preview on hover
+                wrapper.addEventListener('mouseenter', function() {
+                    if (!window.clausePreviews[clauseName]) {
+                        loadClausePreview(clauseName, tooltip);
+                    } else {
+                        tooltip.innerHTML = window.clausePreviews[clauseName];
+                    }
+                });
+            });
+        }
+        
+        function loadClausePreview(clauseName, tooltipElement) {
+            // Check if preview is already loaded in global store
+            if (window.clausePreviewsData && window.clausePreviewsData[clauseName]) {
+                const preview = window.clausePreviewsData[clauseName];
+                window.clausePreviews[clauseName] = preview;
+                tooltipElement.innerHTML = preview.replace(/\\n/g, '<br>');
+            } else {
+                // Fallback placeholder
+                const preview = `Aperçu de: ${clauseName}\\n\\nChargement...`;
+                window.clausePreviews[clauseName] = preview;
+                tooltipElement.innerHTML = preview.replace(/\\n/g, '<br>');
+            }
+        }
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', initializeTooltips);
+        
+        // Also reinitialize when Streamlit reruns
+        setTimeout(initializeTooltips, 100);
+        setInterval(initializeTooltips, 1000);
+        </script>
         """,
         unsafe_allow_html=True
     )
@@ -264,6 +410,10 @@ div.stButton > button:active {
         st.session_state.connection_mode = "local"
     if 'preview_converter' not in st.session_state:
         st.session_state.preview_converter = DocConverter()
+    
+    # Generate clause previews for tooltips (only in local mode for now)
+    if st.session_state.connection_mode == "local" and st.session_state.get('local_client'):
+        _inject_clause_previews_data()
     
     # Inline preview panel (scrollable, non-disabled)
     show_preview = (
@@ -926,6 +1076,54 @@ def _hide_assembly_gif(gif_placeholder):
         )
         time.sleep(0.2)  # Wait for fade out to complete
         gif_placeholder.empty()
+
+def _inject_clause_previews_data():
+    """Inject clause preview data into JavaScript for tooltips"""
+    try:
+        if not st.session_state.get('clauses_by_section'):
+            return
+            
+        preview_data = {}
+        
+        # Generate previews for all clauses
+        for section_key, clauses in st.session_state.clauses_by_section.items():
+            for clause in clauses:
+                clause_name = clause['name']
+                if clause_name not in preview_data:
+                    # Get a short preview (first 200 characters)
+                    preview_text = _get_clause_preview(clause)
+                    if preview_text:
+                        # Truncate and clean up the preview
+                        preview_lines = preview_text.split('\n')[:5]  # Max 5 lines
+                        preview = '\n'.join(preview_lines)
+                        if len(preview) > 300:
+                            preview = preview[:297] + '...'
+                        
+                        # Escape for JavaScript
+                        preview = preview.replace('"', '\\"').replace('\n', '\\n').replace('\r', '')
+                        preview_data[clause_name] = preview
+                    else:
+                        preview_data[clause_name] = f"Aperçu de: {clause_name}\\n\\n(Contenu non disponible)"
+        
+        # Inject into JavaScript
+        preview_js = "{"
+        for name, preview in preview_data.items():
+            escaped_name = name.replace('"', '\\"')
+            preview_js += f'"{escaped_name}": "{preview}",'
+        preview_js = preview_js.rstrip(',') + "}"
+        
+        st.markdown(
+            f"""
+            <script>
+            window.clausePreviewsData = {preview_js};
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
+        
+    except Exception as e:
+        # Silently fail to avoid breaking the app
+        pass
 
 if __name__ == "__main__":
     main()
