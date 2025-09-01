@@ -284,11 +284,8 @@ div.stButton > button:active {
             unsafe_allow_html=True,
         )
         if st.button("Fermer l'aperçu", key="close_preview_panel"):
-            # Clean up preview state without rerun
-            for key in ['preview_content', 'preview_title', 'hide_preview']:
-                if key in st.session_state:
-                    del st.session_state[key]
-            st.rerun()
+            # Simply hide the preview without triggering a rerun
+            st.session_state.hide_preview = True
     
     # Sidebar for configuration
     with st.sidebar:
